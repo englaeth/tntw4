@@ -1,0 +1,252 @@
+body {
+  font-family: "Roboto", "Tajawal", sans-serif;
+  overscroll-behavior: none;
+  margin: 0;
+  padding: 0;
+}
+
+#tsparticles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+#landscapePrompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  color: white;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+#landscapePrompt i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #00f5d4;
+}
+
+#gameContainer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  background-color: #0a0f18;
+}
+
+#nameMenu, #main-page, #profile-page, #shopScreen, #leaderboardScreen, #settingsModal, #multiplayer-menu, #lobby-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.95);
+  color: white;
+  z-index: 1000;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#main-page { z-index: 1001; }
+#profile-page, #shopScreen, #leaderboardScreen, #settingsModal, #multiplayer-menu, #lobby-screen { display: none; z-index: 1002; }
+#nameMenu { display: none; z-index: 1003; }
+
+#info, #status, #popup, #roomCodeDisplay, #leaderboardBtnInGame, #powerupsContainer {
+  position: absolute;
+  z-index: 2;
+}
+
+#info {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+#roomCodeDisplay {
+  top: 10px;
+  left: 10px;
+  color: #00f5d4;
+  font-size: 16px;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+#status {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px 15px;
+  border-radius: 5px;
+  display: flex;
+  gap: 15px;
+}
+
+#popup {
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(15, 23, 42, 0.95);
+  color: #00f5d4;
+  padding: 25px 35px; border-radius: 15px;
+  font-size: 24px; display: none;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 245, 212, 0.6);
+  border: 2px solid #00f5d4;
+  z-index: 1005;
+}
+#popup.win {
+    color: #33ff33;
+    border-color: #33ff33;
+    box-shadow: 0 0 30px rgba(51, 255, 51, 0.6);
+}
+#popup.loss {
+    color: #ff3e3e;
+    border-color: #ff3e3e;
+    box-shadow: 0 0 30px rgba(255, 62, 62, 0.6);
+}
+
+#leaderboardBtnInGame {
+  top: 10px;
+  right: 10px;
+  background-color: #00f5d4;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 3;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s;
+}
+
+#leaderboardBtnInGame:hover {
+  background-color: #00c9b3;
+  transform: scale(1.05);
+}
+
+#joystickContainer {
+  position: fixed;
+  z-index: 5000;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  touch-action: none;
+}
+
+#joystickCanvas {
+  width: 140px;
+  height: 140px;
+  touch-action: none;
+}
+
+input[type="text"], button, select {
+  padding: 12px;
+  margin: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  width: 90%;
+  max-width: 400px;
+}
+
+input[type="text"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid #00f5d4;
+}
+
+button {
+  cursor: pointer;
+  background-color: #00f5d4;
+  color: #0f172a;
+  font-weight: bold;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover {
+  background-color: #00c9b3;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 245, 212, 0.4);
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab-button.active {
+  background: #00f5d4;
+  color: #0f172a;
+}
+
+.tab-content {
+  display: none;
+  width: 100%;
+}
+
+.tab-content.active {
+  display: block;
+}
+.glow {
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px #00f5d4;
+  }
+  to {
+    box-shadow: 0 0 20px #00f5d4;
+  }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
