@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title data-translate-key="appTitle">Try NOT To WIN</title>
+
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Socket.IO Client -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  
+  <!-- Tasks JS -->
+  <script src="js/tasks.js" defer></script>
+
+  <!-- Google Font: Tajawal (for Arabic), and a suitable font for English -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            tajawal: ["Tajawal", "sans-serif"],
+            roboto: ["Roboto", "sans-serif"],
+          },
+          colors: {
+            primary: "#00f5d4",
+            secondary: "#ff3e3e",
+            dark: "#0f172a",
+            poisonGreen: "#33ff33",
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-dark text-white font-roboto relative overflow-hidden min-h-screen">
+
+  <!-- Landscape Prompt -->
+  <div id="landscapePrompt">
+    <i class="fas fa-mobile-alt"></i>
+    <p class="text-xl" data-translate-key="rotateDevicePrompt">الرجاء تدوير جهازك إلى الوضع الأفقي للعب.</p>
+    <p class="text-md mt-2" data-translate-key="rotateDevicePromptEn">(Please rotate your device to landscape mode to play.)</p>
+  </div>
+
+  <!-- خلفية النجوم -->
+  <div id="tsparticles"></div>
+
+<!-- Currency Display -->
+  <div id="currency-display" style="position: absolute; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 8px; font-size: 16px; z-index: 1004; font-family: 'Tajawal', sans-serif;">
+    <i class="fas fa-coins mr-2 text-yellow-400"></i> <span data-translate-key="currencyLabel">عملات</span>: <span id="coinsValue">0</span>
+  </div>
+
+  <!-- الصفحة الرئيسية -->
+  <div id="main-page" class="fixed top-0 left-0 w-full h-full flex flex-col justify-center items-center z-10 px-6">
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold mb-4 text-primary glow" data-translate-key="gameTitle">Try NOT To WIN</h1>
+      <p class="text-xl opacity-80" data-translate-key="gameSubtitleNew">لعبة البقاء العكسية: صغّر حجمك لتفوز!</p>
+    </div>
+    
+    <div class="flex flex-col items-center w-full max-w-md space-y-4">
+      <button onclick="startGameUI()" class="px-10 py-5 bg-primary text-dark text-xl rounded-xl shadow-2xl hover:scale-105 transition font-bold w-full pulse">
+        <i class="fas fa-user-ninja mr-2"></i> <span data-translate-key="playSolo">اللعب الفردي</span>
+      </button>
+      <button onclick="showMultiplayerMenu()" class="px-10 py-5 bg-primary text-dark text-xl rounded-xl shadow-2xl hover:scale-105 transition font-bold w-full">
+        <i class="fas fa-users mr-2"></i> <span data-translate-key="playOnline">اللعب عبر الإنترنت</span>
+      </button>
+      <button onclick="showLeaderboardUI()" class="px-10 py-5 bg-transparent border-2 border-primary text-primary text-xl rounded-xl shadow-2xl hover:bg-primary hover:text-dark transition font-bold w-full">
+        <i class="fas fa-trophy mr-2"></i> <span data-translate-key="leaderboard">لوحة المتصدرين</span>
+      </button>
+      <button onclick="showShopUI()" class="px-10 py-5 bg-transparent border-2 border-primary text-primary text-xl rounded-xl shadow-2xl hover:bg-primary hover:text-dark transition font-bold w-full">
+        <i class="fas fa-store mr-2"></i> <span data-translate-key="shop">المتجر</span>
+      </button>
+      <button onclick="showTasksUI()" class="px-10 py-5 bg-transparent border-2 border-primary text-primary text-xl rounded-xl shadow-2xl hover:bg-primary hover:text-dark transition font-bold w-full">
+        <i class="fas fa-tasks mr-2"></i> <span data-translate-key="tasks">المهام</span>
+      </button>
+      <button onclick="showProfileUI()" class="px-10 py-5 bg-transparent border-2 border-primary text-primary text-xl rounded-xl shadow-2xl hover:bg-primary hover:text-dark transition font-bold w-full">
+        <i class="fas fa-user mr-2"></i> <span data-translate-key="profile">الملف الشخصي</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Multiplayer Menu -->
+  <div id="multiplayer-menu" class="hidden">
+    <h1 class="text-4xl font-bold mb-10 text-primary" data-translate-key="multiplayerMenuTitle">اللعب عبر الإنترنت</h1>
+    <div class="flex flex-col items-center w-full max-w-md space-y-4">
+        <button onclick="createRoom()" class="px-10 py-4 bg-primary text-dark text-lg rounded-xl shadow-lg hover:scale-105 transition font-bold w-full">
+            <i class="fas fa-plus-square mr-2"></i> <span data-translate-key="createRoom">إنشاء غرفة</span>
+        </button>
+        <div class="w-full">
+            <input type="text" id="joinRoomCodeInput" data-translate-key-placeholder="enterRoomCodePlaceholder" placeholder="أدخل كود الغرفة" class="text-center mb-2 w-full" />
+            <button onclick="joinRoomWithCode()" class="px-10 py-4 bg-primary text-dark text-lg rounded-xl shadow-lg hover:scale-105 transition font-bold w-full">
+                <i class="fas fa-sign-in-alt mr-2"></i> <span data-translate-key="joinRoomByCode">الانضمام بكود</span>
+            </button>
+        </div>
+        <button onclick="joinRandomRoom()" class="px-10 py-4 bg-primary text-dark text-lg rounded-xl shadow-lg hover:scale-105 transition font-bold w-full">
+            <i class="fas fa-random mr-2"></i> <span data-translate-key="randomMatch">انضمام عشوائي</span>
+        </button>
+        <button onclick="showMainPage()" class="mt-8 px-8 py-3 bg-transparent border-2 border-gray-500 text-gray-300 rounded-xl hover:bg-gray-700 hover:text-white transition font-bold w-full">
+            <i class="fas fa-arrow-left mr-2"></i> <span data-translate-key="backToMain">العودة للرئيسية</span>
+        </button>
+    </div>
+  </div>
+
+  <!-- Lobby Screen -->
+  <div id="lobby-screen" class="hidden">
+    <h2 class="text-3xl font-bold mb-4 text-primary" data-translate-key="lobbyTitle">غرفة الانتظار</h2>
+    <div class="mb-4">
+        <span data-translate-key="roomCodeLabel">كود الغرفة:</span> <strong id="lobbyRoomCodeDisplay" class="text-primary text-xl">-----</strong>
+    </div>
+    <div class="mb-6 w-full max-w-md bg-slate-800 p-4 rounded-lg">
+        <h3 class="text-xl font-semibold mb-2 text-primary" data-translate-key="playersInLobby">اللاعبون:</h3>
+        <ul id="lobbyPlayerList" class="list-none p-0 text-left space-y-2">
+            <!-- Player items will be added here by JS: <li>Player Name (Ready)</li> -->
+        </ul>
+    </div>
+    <div class="flex flex-col items-center w-full max-w-xs space-y-3">
+        <button id="lobbyReadyButton" onclick="togglePlayerReady()" class="px-8 py-3 bg-green-500 hover:bg-green-400 text-white text-lg rounded-xl shadow-lg w-full">
+            <i class="fas fa-check-circle mr-2"></i> <span data-translate-key="ready">جاهز</span>
+        </button>
+        <button id="lobbyStartGameButton" onclick="hostStartGame()" class="hidden px-8 py-3 bg-blue-500 hover:bg-blue-400 text-white text-lg rounded-xl shadow-lg w-full">
+            <i class="fas fa-play-circle mr-2"></i> <span data-translate-key="startGameHost">بدء اللعبة (للمضيف)</span>
+        </button>
+        <button onclick="leaveRoom()" class="px-8 py-3 bg-red-500 hover:bg-red-400 text-white text-lg rounded-xl shadow-lg w-full">
+            <i class="fas fa-sign-out-alt mr-2"></i> <span data-translate-key="leaveRoom">مغادرة الغرفة</span>
+        </button>
+    </div>
+  </div>
+
+  <!-- صفحة الملف الشخصي -->
+  <div id="profile-page" class="hidden">
+      <div class="flex flex-col items-center w-full max-w-md space-y-4">
+      <div class="relative mb-6" id="avatarContainer">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-3xl font-bold overflow-hidden">
+          <img id="profileAvatar" src="" alt="Avatar" class="w-full h-full object-cover hidden"/>
+          <span id="profileInitials">?</span>
+        </div>
+        <button onclick="changeAvatar()" class="absolute -bottom-2 -right-2 w-8 h-8 bg-primary text-dark rounded-full flex items-center justify-center" data-translate-key-title="changeAvatarTitle" title="تغيير الصورة الرمزية">
+          <i class="fas fa-pencil-alt text-xs"></i>
+        </button>
+      </div>
+      <h2 class="text-2xl font-bold mb-4" data-translate-key="profileTitle">الملف الشخصي</h2>
+      <div class="w-full bg-gray-800 bg-opacity-50 rounded-xl p-4">
+        <div class="flex justify-between items-center mb-3">
+          <span class="opacity-80" data-translate-key="profileNameLabel">الاسم:</span>
+          <span id="profileName" class="font-bold">زائر</span>
+        </div>
+         <!-- Other profile stats -->
+      </div>
+      <div class="w-full mt-4">
+        <button id="settingsButton" class="bg-primary text-dark px-6 py-3 rounded-lg shadow hover:bg-opacity-90 transition font-bold w-full mb-3">
+          <i class="fas fa-cog mr-2"></i> <span data-translate-key="settings">الإعدادات</span>
+        </button>
+        <button onclick="showMainPage()" class="text-primary hover:underline mt-2 font-bold w-full text-left">
+          <i class="fas fa-arrow-left mr-2"></i> <span data-translate-key="backToMain">العودة للرئيسية</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks Screen -->
+  <div id="tasksScreen" class="fixed top-0 left-0 w-full h-full flex flex-col justify-start items-center z-1002 px-6 py-10 hidden">
+    <h1 class="text-4xl font-bold mb-6 text-primary" data-translate-key="tasksTitle">المهام</h1>
+    
+    <div id="tasksContainer" class="w-full max-w-md bg-slate-800 bg-opacity-70 rounded-xl p-6 mb-6">
+      <!-- Tasks will be added here by JS -->
+    </div>
+    
+    <button onclick="showMainPage()" class="mt-4 px-8 py-3 bg-transparent border-2 border-gray-500 text-gray-300 rounded-xl hover:bg-gray-700 hover:text-white transition font-bold">
+      <i class="fas fa-arrow-left mr-2"></i> <span data-translate-key="backToMain">العودة للرئيسية</span>
+    </button>
+  </div>
+
+  <!-- Game Container -->
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="info"></div>
+    <div id="status"></div>
+    <div id="popup"></div>
+    <div id="roomCodeDisplay"></div>
+    <div id="leaderboardBtnInGame" onclick="showLeaderboardUI()">
+      <i class="fas fa-trophy"></i> <span data-translate-key="leaderboard">لوحة المتصدرين</span>
+    </div>
+    <div id="powerupsContainer"></div>
+    <div id="joystickContainer">
+      <canvas id="joystickCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Name Menu -->
+  <div id="nameMenu">
+    <h2 class="text-2xl font-bold mb-6 text-primary" data-translate-key="enterYourName">أدخل اسمك</h2>
+    <input type="text" id="playerNameInput" data-translate-key-placeholder="namePlaceholder" placeholder="اسم اللاعب" maxlength="15" class="mb-4">
+    <button onclick="submitPlayerName()" class="bg-primary text-dark px-8 py-3 rounded-lg shadow-lg hover:scale-105 transition font-bold">
+      <i class="fas fa-play mr-2"></i> <span data-translate-key="startPlaying">ابدأ اللعب</span>
+    </button>
+  </div>
+
+  <!-- Shop Screen -->
+  <div id="shopScreen" class="hidden">
+    <!-- Shop content will be added by JS -->
+  </div>
+
+  <!-- Leaderboard Screen -->
+  <div id="leaderboardScreen" class="hidden">
+    <!-- Leaderboard content will be added by JS -->
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="hidden">
+    <!-- Settings content will be added by JS -->
+  </div>
+
+  <!-- Game Scripts - Load order is important! -->
+  <script src="js/config.js"></script>
+  <script src="js/language.js"></script>
+  <script src="js/game.js"></script> <!-- Define Game class first -->
+  <script src="js/joystick.js"></script>
+  <script src="js/powerups.js"></script>
+  <script src="js/skins.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/effects/magnet-effect.js"></script>
+  <script src="js/effects/reverse-controls-effect.js"></script>
+  <script src="js/effects/swap-sizes-effect.js"></script>
+  <script src="js/effects/control-opponent-effect.js"></script>
+  <script src="js/effects-integration.js"></script>
+  <script src="js/luckyWheel.js"></script>
+  <script src="js/multiplayer.js"></script> <!-- Depends on Game -->
+  <script src="js/ui.js"></script> <!-- Depends on Game -->
+  <script src="js/main.js"></script> <!-- Entry point, initializes UI etc. -->
+</body>
+</html>
+
+
+
+<!-- Lucky Wheel Modal -->
+<div id="luckyWheelModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-1005">
+  <div class="bg-slate-800 p-8 rounded-xl shadow-2xl text-center relative max-w-sm w-full">
+    <h2 class="text-3xl font-bold mb-6 text-primary" data-translate-key="luckyWheelTitle">عجلة الحظ!</h2>
+    <p class="mb-6 opacity-80" data-translate-key="luckyWheelDesc">لقد فزت (بخسارتك)! أدر العجلة لتربح عملات.</p>
+    <div class="relative w-64 h-64 mx-auto mb-8">
+      <canvas id="luckyWheelCanvas" width="256" height="256"></canvas>
+      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-0 h-0 
+        border-l-[10px] border-l-transparent
+        border-t-[15px] border-t-red-500
+        border-r-[10px] border-r-transparent">
+        <!-- Pointer -->
+      </div>
+    </div>
+    <button id="spinWheelButton" onclick="spinWheel()" class="px-10 py-4 bg-primary text-dark text-xl rounded-xl shadow-lg hover:scale-105 transition font-bold w-full pulse">
+      <i class="fas fa-sync-alt mr-2"></i> <span data-translate-key="spinWheel">أدر العجلة</span>
+    </button>
+    <div id="wheelResult" class="mt-4 text-xl font-bold text-yellow-400 hidden"></div>
+    <button id="closeWheelButton" onclick="closeLuckyWheel()" class="hidden mt-4 px-8 py-2 bg-transparent border-2 border-gray-500 text-gray-300 rounded-xl hover:bg-gray-700 hover:text-white transition font-bold w-full">
+        <i class="fas fa-times mr-2"></i> <span data-translate-key="close">إغلاق</span>
+    </button>
+  </div>
+</div>
+
